@@ -23,6 +23,7 @@ class _CallLogsscreenState extends State<CallLogsscreen> {
   List<CallLogEntry> callLogs = [];
   List<AudioPlayer> audioPlayers = [];
   List<Uint8List> pickedFiles = [];
+  List<String> audios = [];
   List<bool> isPlaying = [];
   List<Duration> duration = [];
   List<Duration> position = [];
@@ -32,12 +33,11 @@ class _CallLogsscreenState extends State<CallLogsscreen> {
   late bool newpath;
   late String path;
 
-  // final audioQuery = OnAudioQuery();
-
   @override
   void initState() {
     super.initState();
     pickandstoreFiles();
+
     // check_user_set_path();
     _fetchCallLogs();
   }
@@ -238,63 +238,76 @@ class _CallLogsscreenState extends State<CallLogsscreen> {
                         ],
                       ),
                       key: ValueKey(index),
-                      trailing: Wrap(
-                        direction: Axis.vertical,
+                      trailing: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          Text(
-                            _getFormattedDuration(callLog),
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          Expanded(
+                            child: Text(
+                              _getFormattedDuration(callLog),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
                           ),
                           const SizedBox(
                             height: 8,
                           ),
-                          Icon(
-                            Icons.call,
-                            size: 20,
-                            color: callLog.callType == CallType.incoming
-                                ? Colors.blue
-                                : callLog.callType == CallType.outgoing
-                                    ? Colors.green
-                                    : Colors.red,
+                          Expanded(
+                            child: Icon(
+                              Icons.call,
+                              size: 17,
+                              color: callLog.callType == CallType.incoming
+                                  ? Colors.blue
+                                  : callLog.callType == CallType.outgoing
+                                      ? Colors.green
+                                      : Colors.red,
+                            ),
                           ),
+                          pickedFiles[index].isNotEmpty
+                              ? Expanded(
+                                  child: Icon(
+                                  Icons.keyboard_arrow_down,
+                                  size: 24,
+                                ))
+                              : SizedBox(),
                         ],
                       ),
                       children: [
-                        // pickedFiles.isEmpty
-                        //     ? SizedBox(
-                        //         child: Center(
-                        //           child: Text("No recordings Available"),
-                        //         ),
-                        //       )
-                        //     :
-                        Row(
-                          children: [
-                            IconButton(
-                              onPressed: () {
-                                print(pickedFiles[index]);
-                                _playRecordings(pickedFiles[index], index);
-                              },
-                              icon: Icon(isPlaying[index]
-                                  ? Icons.pause
-                                  : Icons.play_arrow),
-                            ),
-                            Expanded(
-                              flex: 6,
-                              child: Slider(
-                                min: 0,
-                                max: duration[index].inSeconds.toDouble(),
-                                value: position[index].inSeconds.toDouble(),
-                                onChanged: (value) {
-                                  seekAudio(index, value);
-                                },
-                              ),
-                            ),
-                            Expanded(
-                                flex: 1,
-                                child: Text(formattime(
-                                    duration[index] - position[index]))),
-                          ],
-                        )
+                        pickedFiles[index].isEmpty
+                            ? SizedBox(
+                                child: Center(
+                                  child: Text("No recordings Available"),
+                                ),
+                              )
+                            : Row(
+                                children: [
+                                  IconButton(
+                                    onPressed: () {
+                                      print(pickedFiles[index]);
+                                      _playRecordings(
+                                          pickedFiles[index], index);
+                                    },
+                                    icon: Icon(isPlaying[index]
+                                        ? Icons.pause
+                                        : Icons.play_arrow),
+                                  ),
+                                  Expanded(
+                                    flex: 6,
+                                    child: Slider(
+                                      min: 0,
+                                      max: duration[index].inSeconds.toDouble(),
+                                      value:
+                                          position[index].inSeconds.toDouble(),
+                                      onChanged: (value) {
+                                        seekAudio(index, value);
+                                      },
+                                    ),
+                                  ),
+                                  Expanded(
+                                      flex: 1,
+                                      child: Text(formattime(
+                                          duration[index] - position[index]))),
+                                ],
+                              )
                       ],
                     );
                   },
@@ -411,6 +424,7 @@ class _CallLogsscreenState extends State<CallLogsscreen> {
 
     // Write the Uint8List to the file
     await file.writeAsBytes(uint8List);
+    audios.add(file.path);
 
     return file.path;
   }
