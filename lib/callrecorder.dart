@@ -1,9 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:telephony/telephony.dart';
 
 class CallRecorderScreen extends StatefulWidget {
   const CallRecorderScreen({Key? key}) : super(key: key);
@@ -18,6 +21,8 @@ class _CallRecorderScreenState extends State<CallRecorderScreen> {
   String? filePath;
   bool isRecording = false;
   List<String> recordedFiles = [];
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   @override
   void initState() {
@@ -25,6 +30,42 @@ class _CallRecorderScreenState extends State<CallRecorderScreen> {
     recorder = FlutterSoundRecorder();
     player = FlutterSoundPlayer();
     getRecordedCalls();
+    init();
+  }
+
+  init() async {
+    await _showNotification();
+  }
+
+  Future<void> _showNotification() async {
+    var initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    // var initializationSettingsIOS = IOSInitializationSettings();
+    var initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+      // iOS: initializationSettingsIOS,
+    );
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      'my_notification_channel',
+      'My Notification Channel',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+    // var iOSPlatformChannelSpecifics = IOSNotificationDetails();
+    var platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+      // iOS: iOSPlatformChannelSpecifics,
+    );
+
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      'call recorder',
+      'record your call....',
+      platformChannelSpecifics,
+      payload: 'item x',
+    );
   }
 
   @override
