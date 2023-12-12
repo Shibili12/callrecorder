@@ -1,4 +1,5 @@
 import 'package:callrecorder/calllogpage.dart';
+import 'package:callrecorder/callrecorder.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -12,7 +13,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: CallLogsscreen(),
+      debugShowCheckedModeBanner: false,
+      home: CallRecorderScreen(),
     );
   }
 }
